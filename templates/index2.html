@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+    <head>
+        <title> Temperature Inversion V2 </title>
+    </head>
+
+    <body>
+        <div id="header" style="width:100%;background-color:white;height:30px;"></div>
+        <div class="aspNetHidden">
+            <input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="79E6444B">
+        </div>
+
+        <div class="page">
+            <div class="header">
+                <div class="title">
+                    <h1 align="center">
+                        Hourly Determination of Atmospheric Stability for Aerial Applicators in the Mississippi Delta
+                    </h1>
+                </div>
+            </div>
+
+            <div class="main">
+                This page shows the weather data observed and measured daily up to the current time at each weather station for different location. 
+                The temperatures measured at the stations are marked in green if the temperatures are least three degrees higher than the morning low. 
+                Then, the temperatures remain green until they are five degrees or more below the daily high. Green marks indicate a low potential for 
+                temperature inversion in these locations and aerial application is recommended at the time with green mark. Otherwise, the temperatures 
+                are marked in red, which indicates that the potential for temperature inversion is high and aerial application is not recommended in 
+                those locations at the time with red mark.
+                <p>Click <a href="#map">here</a> to go to the map.</p>
+                <p>For the latest observations and recommendation, please refresh your browser.</p>
+
+                <!-- Updating clock code -->
+                <script type="text/javascript">
+                    tday=new Array("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday");
+                    tmonth=new Array("January","February","March","April","May","June","July","August","September","October","November","December");
+
+                    function GetClock(){
+                        var d=new Date();
+                        var nday=d.getDay(),nmonth=d.getMonth(),ndate=d.getDate(),nyear=d.getYear();
+                        if(nyear<1000) nyear+=1900;
+                        var nhour=d.getHours(),nmin=d.getMinutes(),nsec=d.getSeconds(),ap;
+
+                        if(nhour==0){ap=" AM";nhour=12;}
+                        else if(nhour<12){ap=" AM";}
+                        else if(nhour==12){ap=" PM";}
+                        else if(nhour>12){ap=" PM";nhour-=12;}
+
+                        if(nmin<=9) nmin="0"+nmin;
+                        if(nsec<=9) nsec="0"+nsec;
+
+                        document.getElementById('clockbox').innerHTML=""+tday[nday]+", "+tmonth[nmonth]+" "+ndate+", "+nyear+" "+nhour+":"+nmin+":"+nsec+ap+"";
+                    }
+
+                    window.onload=function(){
+                        GetClock();
+                        setInterval(GetClock,1000);
+                    }
+                </script>
+                <div id="clockbox">Thursday, May 18, 2017 10:29:59 AM</div>
+                <p></p>
+
+                <!-- Table Desktop CSS -->
+                <style type="text/css">
+                    html,
+                    body,
+                        table { 
+                            table-layout: fixed;
+                            width: 100%;
+                            margin:auto;
+                            border-collapse: collapse; 
+                            cellspacing="0";
+                            cellpadding="10";
+                            align="center";
+                            style="color:#333333;
+                        }
+
+                        h1 {
+                            font-size: 200%;
+                        }
+
+                        /* Row formatting */
+                        td { 
+                            padding: 6px; 
+                            text-align: center; 
+                            color:#333333;
+                            border-right: 1px solid white;
+                        }
+
+                        /* Alternate colors for rows */
+                        tr:nth-child(even) { background-color: #D2DEEF; }
+                        tr:nth-child(odd) { background-color: #EAEFF7; }
+
+                        /* Header row formatting */
+                        th { 
+                            padding: 6px; 
+                            text-align: center; 
+                            background-color:#5B9BD5;
+                            font-weight: bold; 
+                            color: white;
+                        }
+                        .footer { 
+                            width: 80%;
+                            position: absolute;
+                            bottom: 0;
+                            height: 100px;
+                        }
+                </style>
+
+                <!-- Table Mobile CSS -->
+                <style>
+                    @media 
+                    only screen and (max-width: 760px),
+                    (min-device-width: 768px) and (max-device-width: 1024px)  {
+                        /* Force table to not be like tables anymore */
+                        table, thead, tbody, th, td, tr {
+                            display: block;
+                        }
+
+                        /* Hide table headers (but not display: none;, for accessibility) */
+                        thead tr { 
+                            position: absolute;
+                            top: -9999px;
+                            left: -9999px;
+                        }
+
+                        /* Row formatting */
+                        td {
+                            /* Behave  like a "row" */
+                            border: 1px solid #fff;
+                            position: relative;
+                            padding-left: 50%;
+                            background-color: #D2DEEF;
+                        }
+
+                        /* Labels for mobile */
+                        td:before {
+                            /* Now like a table header */
+                            position: absolute;
+                            content: attr(data-title);
+                            /* Top/left values mimic padding */
+                            top: 0px;
+                            left: 0px;
+                            bottom: 0px;
+                            width: 50%;
+                            padding-right: 0px;
+                            background-color: #5B9BD5;
+                            font-weight: bold;
+                            color: white;
+                        }
+
+                        /* Add gap between stations */
+                        tr { padding-bottom: 10px; }
+                    }
+                </style>
+                
+
+                <!-- Table code --> 
+                <div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Station</th>
+                                <th>Most Recent Time</th>
+                                <th>Most Recent Temp  (&#176;F)</th>
+                                <th>Wind Speed (MPH)</th>
+                                <th>Low Temp  (&#176;F)</th>
+                                <th>Time of Low</th>
+                                <th>High Temp  (&#176;F)</th>
+                                <th>Time of High</th>
+                            </tr>
+                        </thead>
+                        <!-- Flask template for table rows -->
+                        <tbody>
+                            {% for result in results %}
+                            <tr>
+                                <td class="header" data-title="Station">{{ result[9] }}</td>
+                                {% if result[8] == False %}
+                                    {% if result[0] == True %}
+                                        <td data-title="Most Recent Temp" style="background-color:Crimson;">{{ result[1] }}</td>
+                                    {% else %}
+                                        <td data-title="Most Recent Temp" style="background-color:LightGreen;">{{ result[1] }}</td>
+                                    {% endif %}
+                                    <td data-title="Most Recent Time">{{ result[2] }}</td>
+                                    <td data-title="Wind Speed (MPH)">{{ result[3] }}</td>
+                                    <td data-title="Low Temp  (°F)">{{ result[4] }}</td>
+                                    <td data-title="Time of Low">{{ result[5] }}</td>
+                                    <td data-title="High Temp (°F)">{{ result[6] }}</td>
+                                    <td data-title="Time of High">{{ result[7] }}</td>
+                                {% else %}
+                                    <td colspan="7" style="background-color:red;">The station is temporarily not working, and will be back up shortly</td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <p></p>
+                <p style="margin:0;text-align: center;">This is a research prototype. This is NOT for information consultation.</p>
+                <p></p>
+            </div>
+        </div>
+
+        <!-- Map Code -->
+        <!-- Example code for maps here: https://www.taniarascia.com/google-maps-apis-for-multiple-locations/ -->
+        <div id="map"></div>
+        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAK4nlrHFpSQdWQ19NNPDw4_iA-e2d7KNg&callback=initMap"></script>
+
+        <a name="map"><a/>
+
+        <!-- Map CSS -->
+        <style type="text/css">
+            html,
+            body,
+                #map {
+                    width: 80%;
+                    height: 80%;
+                    margin-left: auto;
+                    margin-right: auto;
+                    padding-bottom: 20px;
+                }
+        </style>
+
+        <script type="text/javascript">
+            function initMap() {
+                <!-- For new stations add a new var here -->
+                var station1 = {
+                    info: '<strong>DREC-2005</strong>\
+                                <br> Verona, MS<br>',
+                    lat: 34.16,
+                    long: -88.72
+                };
+
+                var station2 = {
+                    info: '<strong>DREC-2013</strong>\
+                                <br> Mound Bayou, MS<br>',
+                    lat: 33.87,
+                    long: -90.71
+                };
+
+                var station3 = {
+                    info: '<strong>DREC-2002</strong>\
+                                <br> Thighman Lake, MS<br>',
+                    lat: 33.35,
+                    long: -90.50
+                };
+
+                var station4 = {
+                    info: '<strong>DREC-2012</strong>\
+                                <br> Stockett Farm, MS<br>',
+                    lat: 31.04,
+                    long: -91.31
+                };
+
+                var station5 = {
+                    info: '<strong>DREC-2003</strong>\
+                                <br> Sidon, MS<br>',
+                    lat: 33.42,
+                    long: -90.23
+                };
+
+                var station6 = {
+                    info: '<strong>DREC-2007</strong>\
+                                <br> Prairie, MS<br>',
+                    lat: 33.79,
+                    long: -88.66
+                };
+
+                var station7 = {
+                    info: '<strong>DREC-2001</strong>\
+                                <br> Lyon, MS<br>',
+                    lat: 34.25,
+                    long: -90.54
+                };
+
+                var station8 = {
+                    info: '<strong>DREC-2011</strong>\
+                                <br> Jackson Co., MS<br>',
+                    lat: 30.64,
+                    long: -88.46
+                };
+
+                var station9 = {
+                    info: '<strong>DREC-2006</strong>\
+                                <br> Brooksville, MS<br>',
+                    lat: 33.26,
+                    long: -88.56
+                };
+
+                var station10 = {
+                    info: '<strong>DREC-2010</strong>\
+                                <br> Bee Lake, MS<br>',
+                    lat: 33.04,
+                    long: -90.36
+                };
+
+                var station11 = {
+                    info: '<strong>ARS-1</strong>\
+                                <br> Stoneville, MS<br>',
+                    lat: 33.447664,
+                    long: -90.876153
+                };
+
+                <!-- and here -->
+                var locations = [
+                    [station1.info, station1.lat, station1.long, 0]
+                    ,[station2.info, station2.lat, station2.long, 1]
+                    ,[station3.info, station3.lat, station3.long, 2]
+                    ,[station4.info, station4.lat, station4.long, 3]
+                    ,[station5.info, station5.lat, station5.long, 4]
+                    ,[station6.info, station6.lat, station6.long, 5]
+                    ,[station7.info, station7.lat, station7.long, 6]
+                    ,[station8.info, station8.lat, station8.long, 7]
+                    ,[station9.info, station9.lat, station9.long, 8]
+                    ,[station10.info, station10.lat, station10.long, 9]
+                    ,[station11.info, station11.lat, station11.long, 10]
+                ];
+
+                var map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 7,
+                    center: new google.maps.LatLng(32.736, -89.533),
+                    mapTypeId: google.maps.MapTypeId.HYBRID
+                });
+
+                var infowindow = new google.maps.InfoWindow({});
+
+                var marker, i;
+
+                for (i = 0; i < locations.length; i++) {
+                    marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+                        map: map
+                    });
+
+                    google.maps.event.addListener(marker, 'click', (function (marker, i) {
+                        return function () {
+                            infowindow.setContent(locations[i][0]);
+                            infowindow.open(map, marker);
+                        }
+                    })(marker, i));
+
+                    <!-- This displays the infowindow for the last item in locations -->
+                    infowindow.setContent(locations[i][0]);
+                    infowindow.open(map, marker);
+                }
+            }
+        </script>
+        <div class="footer"></div>
+    </body>
+</html>

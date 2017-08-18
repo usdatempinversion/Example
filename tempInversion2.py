@@ -437,8 +437,6 @@ def main():
         result.append(url[1])
         results.append(result)
 
-    # Dummy station that will never work (for testing)
-    #results.append([True, 0, 0, 0, 0, 0, 0, 0, True, "Dummy"])
     return results
 
 
